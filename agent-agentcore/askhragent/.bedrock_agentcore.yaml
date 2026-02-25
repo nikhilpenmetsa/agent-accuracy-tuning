@@ -1,0 +1,35 @@
+default_agent: askhragent
+agents:
+  askhragent:
+    name: askhragent
+    entrypoint: C:\projects\hr-kb\agent-agentcore\askhragent\src\main.py
+    platform: linux/amd64
+    container_runtime: docker
+    aws:
+      execution_role: arn:aws:iam::986112483391:role/AmazonBedrockAgentCoreSDKRuntime-us-east-1-aed96d2974
+      execution_role_auto_create: false
+      account: '986112483391'
+      region: us-east-1
+      ecr_repository: 986112483391.dkr.ecr.us-east-1.amazonaws.com/bedrock-agentcore-askhragent-agent
+      ecr_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+    bedrock_agentcore:
+      agent_id: askhragent-0L4quKFDp0
+      agent_arn: arn:aws:bedrock-agentcore:us-east-1:986112483391:runtime/askhragent-0L4quKFDp0
+      agent_session_id: 6cf26f04-f274-47ad-ac06-d5034437faa7
+    codebuild:
+      project_name: bedrock-agentcore-askhragent-agent-builder
+      execution_role: arn:aws:iam::986112483391:role/AmazonBedrockAgentCoreSDKCodeBuild-us-east-1-aed96d2974
+      source_bucket: bedrock-agentcore-codebuild-sources-986112483391-us-east-1
+    authorizer_configuration:
+      customJWTAuthorizer:
+        discoveryUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_9sTo5RtFm/.well-known/openid-configuration
+        allowedAudience:
+        - 395nqjcnulut82roo9st4afos
+    request_header_configuration: null
+    oauth_configuration: null

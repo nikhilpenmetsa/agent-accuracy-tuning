@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Case Backend - Mock Workday API for HR Agent Testing'
+
+Parameters:
+  StackName:
+    Type: String
+    Description: Name for the stack (passed from deploy script)
+
+Resources:
+  # DynamoDB Table for Cases
+  CasesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${StackName}-cases'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: case_id
+          AttributeType: S
+        - AttributeName: employee_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: case_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: employee-index
+          KeySchema:
+            - AttributeName: employee_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # Cognito User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${StackName}-users'
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: false
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+
+  # Cognito User Pool Client
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${StackName}-client'
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt CasesTable.Arn
+                  - !Sub '${CasesTable.Arn}/index/*'
+
+  # Lambda Functions
+  CreateCaseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${StackName}-create-case'
+      Runtime: python3.11
+      Handler: create_case.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {'statusCode': 200, 'body': json.dumps({'message': 'Placeholder'})}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CasesTable
+      Timeout: 30
+
+  GetCasesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${StackName}-get-cases'
+      Runtime: python3.11
+      Handler: get_cases.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {'statusCode': 200, 'body': json.dumps({'message': 'Placeholder'})}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CasesTable
+      Timeout: 30
+
+  GetCaseTypesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${StackName}-get-case-types'
+      Runtime: python3.11
+      Handler: get_case_types.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {'statusCode': 200, 'body': json.dumps({'message': 'Placeholder'})}
+      Timeout: 30
+
+  # API Gateway
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${StackName}-api'
+      Description: MockDay API for HR Agent Testing
+
+  # Cognito Authorizer
+  ApiAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoAuthorizer
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref RestApi
+      ProviderARNs:
+        - !GetAtt UserPool.Arn
+
+  # API Resources
+  CasesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: cases
+
+  CaseTypesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: case-types
+
+  # POST /cases
+  CreateCaseMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref CasesResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateCaseFunction.Arn}/invocations'
+
+  # GET /cases
+  GetCasesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref CasesResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetCasesFunction.Arn}/invocations'
+
+  # GET /case-types
+  GetCaseTypesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref CaseTypesResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetCaseTypesFunction.Arn}/invocations'
+
+  # Lambda Permissions
+  CreateCasePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CreateCaseFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*'
+
+  GetCasesPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetCasesFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*'
+
+  GetCaseTypesPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetCaseTypesFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*'
+
+  # API Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - CreateCaseMethod
+      - GetCasesMethod
+      - GetCaseTypesMethod
+    Properties:
+      RestApiId: !Ref RestApi
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: prod
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub 'https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+  
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref UserPoolClient
+  
+  UserPoolArn:
+    Description: Cognito User Pool ARN
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: !Sub '${StackName}-UserPoolArn'
+  
+  TableName:
+    Description: DynamoDB Table Name
+    Value: !Ref CasesTable

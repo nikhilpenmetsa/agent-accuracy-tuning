@@ -1,0 +1,9 @@
+{
+    "ENABLE_QUICK_LOGIN": true,
+    "COGNITO_USER_POOL_ID": "us-east-1_9sTo5RtFm",
+    "COGNITO_CLIENT_ID": "395nqjcnulut82roo9st4afos",
+    "API_BASE_URL": "https://8zjrttqdg7.execute-api.us-east-1.amazonaws.com/prod",
+    "SESSION_API_URL": "https://w4d5kxne67.execute-api.us-east-1.amazonaws.com/prod",
+    "AWS_REGION": "us-east-1",
+    "AGENT_ENDPOINT": "https://bedrock-agentcore.us-east-1.amazonaws.com/runtimes/arn%3Aaws%3Abedrock-agentcore%3Aus-east-1%3A986112483391%3Aruntime%2Faskhragent-0L4quKFDp0/invocations"
+}

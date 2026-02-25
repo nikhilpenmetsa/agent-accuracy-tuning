@@ -1,0 +1,47 @@
+# Environment configuration
+config.env
+.env
+
+# Generated files
+kb_config.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# AWS
+.aws-sam/
+
+# Lambda packages and dependencies
+lambda-package.zip
+session-backend/lambda/boto3/
+session-backend/lambda/botocore/
+session-backend/lambda/*.dist-info/
+session-backend/lambda/bin/
+
+# Generated outputs
+outputs.json
+config-downloaded.json

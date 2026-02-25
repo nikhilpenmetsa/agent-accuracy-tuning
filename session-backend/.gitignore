@@ -1,0 +1,5 @@
+.env
+outputs.json
+lambda-package.zip
+__pycache__/
+*.pyc

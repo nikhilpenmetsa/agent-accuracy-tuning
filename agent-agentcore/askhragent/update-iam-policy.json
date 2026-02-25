@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SSMParameterAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ],
+      "Resource": [
+        "arn:aws:ssm:us-east-1:986112483391:parameter/hr-assistant/*"
+      ]
+    },
+    {
+      "Sid": "BedrockKnowledgeBaseAccess",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:Retrieve"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:us-east-1:986112483391:knowledge-base/8WTHFPVP3H"
+      ]
+    },
+    {
+      "Sid": "AgentCoreMemoryAccess",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:GetMemory",
+        "bedrock-agentcore:PutMemory",
+        "bedrock-agentcore:DeleteMemory",
+        "bedrock-agentcore:ListMemories"
+      ],
+      "Resource": [
+        "arn:aws:bedrock-agentcore:us-east-1:986112483391:memory/hr_assistant_memory-*"
+      ]
+    }
+  ]
+}
