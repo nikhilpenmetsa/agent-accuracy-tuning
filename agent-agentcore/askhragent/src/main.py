@@ -34,7 +34,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8000",
-        "https://*.cloudfront.net",  # Will be updated with specific CloudFront domain
+        "https://d1cnq48gl9k6rd.cloudfront.net",  # CloudFront domain
     ],
     allow_credentials=True,
     allow_methods=["*"],

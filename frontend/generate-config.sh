@@ -23,6 +23,7 @@ echo "📋 Generating config.json..."
 
 # Get Cognito config from case-backend stack
 CASE_BACKEND_STACK="${PROJECT_NAME}-case-backend-stack"
+SESSION_BACKEND_STACK="${PROJECT_NAME}-session-backend-stack"
 
 USER_POOL_ID=$(aws cloudformation describe-stacks \
     --stack-name "$CASE_BACKEND_STACK" \
@@ -42,9 +43,16 @@ API_URL=$(aws cloudformation describe-stacks \
     --output text \
     --region ${AWS_REGION})
 
+SESSION_API_URL=$(aws cloudformation describe-stacks \
+    --stack-name "$SESSION_BACKEND_STACK" \
+    --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
+    --output text \
+    --region ${AWS_REGION})
+
 echo "✓ Cognito User Pool ID: $USER_POOL_ID"
 echo "✓ Cognito Client ID: $CLIENT_ID"
 echo "✓ Case API URL: $API_URL"
+echo "✓ Session API URL: $SESSION_API_URL"
 
 # Get AgentCore endpoint from agent config
 AGENT_CONFIG="../agent-agentcore/askhragent/.bedrock_agentcore.yaml"
@@ -77,6 +85,7 @@ printf '{
     "COGNITO_USER_POOL_ID": "%s",
     "COGNITO_CLIENT_ID": "%s",
     "API_BASE_URL": "%s",
+    "SESSION_API_URL": "%s",
     "AWS_REGION": "%s",
     "AGENT_ENDPOINT": "%s"
 }\n' \
@@ -84,6 +93,7 @@ printf '{
     "$USER_POOL_ID" \
     "$CLIENT_ID" \
     "$API_URL" \
+    "$SESSION_API_URL" \
     "${AWS_REGION}" \
     "$AGENT_ENDPOINT" > config.json
 
