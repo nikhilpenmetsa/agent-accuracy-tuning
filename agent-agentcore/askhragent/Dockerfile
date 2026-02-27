@@ -18,5 +18,5 @@ ENV PYTHONUNBUFFERED=1
 # Expose port for AgentCore
 EXPOSE 8080
 
-# Run the agent using the main.py entrypoint
-CMD ["python", "src/main.py"]
+# Run the agent using the main.py entrypoint with OpenTelemetry instrumentation
+CMD ["opentelemetry-instrument", "python", "src/main.py"]

@@ -1,0 +1,570 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2026-02-25",
+    "purpose": "Test set for evaluating HR assistant agent accuracy",
+    "focus_areas": [
+      "Knowledge base search appropriateness",
+      "Case creation accuracy",
+      "Tool selection",
+      "Context maintenance",
+      "Response accuracy"
+    ]
+  },
+  "simple_factual": [
+    {
+      "id": "sf-001",
+      "question": "How many PTO days do I get?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["tenure", "15 days", "20 days", "25 days", "30 days"],
+      "notes": "Should search KB and explain accrual varies by tenure"
+    },
+    {
+      "id": "sf-002",
+      "question": "What's the company 401k match?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["100%", "3%", "50%", "2%", "4"],
+      "notes": "Should find: 100% of first 3%, 50% of next 2%"
+    },
+    {
+      "id": "sf-003",
+      "question": "When is open enrollment?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["November", "1-30"],
+      "notes": "Should find November 1-30 from benefits-overview.md"
+    },
+    {
+      "id": "sf-004",
+      "question": "What holidays does ACME observe?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["11", "New Year", "Christmas", "Thanksgiving"],
+      "notes": "Should list 11 paid holidays"
+    },
+    {
+      "id": "sf-005",
+      "question": "What's the standard work week?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Monday-Friday", "9:00 AM", "5:00 PM", "40 hours"],
+      "notes": "Basic info from employee handbook"
+    }
+  ],
+  "policy_clarification": [
+    {
+      "id": "pc-001",
+      "question": "Can I work remotely?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["6 months", "manager approval", "hybrid", "full remote"],
+      "notes": "Should explain eligibility criteria from workplace-policies.md"
+    },
+    {
+      "id": "pc-002",
+      "question": "What's the dress code?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["business casual", "Monday-Thursday", "Casual Friday"],
+      "notes": "Should find dress code from employee-handbook.md"
+    },
+    {
+      "id": "pc-003",
+      "question": "How do I submit an expense report?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Workday", "30 days", "receipts", "manager approval"],
+      "notes": "Should provide step-by-step from travel-expense-policy.md"
+    },
+    {
+      "id": "pc-004",
+      "question": "What dental insurance do we have?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Delta Dental", "$25", "$75", "$2,000"],
+      "notes": "Should find dental details from benefits-overview.md"
+    },
+    {
+      "id": "pc-005",
+      "question": "Can I expense a rental car for a trip to Boston?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["multiple meetings", "mid-size", "compact"],
+      "notes": "Should explain rental car policy and when it's approved"
+    },
+    {
+      "id": "pc-006",
+      "question": "What's the meal allowance when traveling?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["$20", "$30", "$60", "$110"],
+      "notes": "Should provide daily meal limits from travel policy"
+    },
+    {
+      "id": "pc-007",
+      "question": "How do I update my address in Workday?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Personal Information", "Contact Information", "Edit"],
+      "notes": "Should provide steps from workday-user-guide.md"
+    },
+    {
+      "id": "pc-008",
+      "question": "What's the vesting schedule for 401k matching?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["immediate", "employee contributions", "3-year cliff", "company match"],
+      "notes": "Should explain immediate vesting for employee, 3-year for company match"
+    }
+  ],
+  "explicit_case_requests": [
+    {
+      "id": "ec-001",
+      "question": "I need to submit a request for parental leave",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should gather details (due date, type of leave) and create case",
+      "notes": "Clear case creation request"
+    },
+    {
+      "id": "ec-002",
+      "question": "Please create a case for my benefits enrollment issue",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should ask for details about the issue and create case",
+      "notes": "Explicit case creation request"
+    },
+    {
+      "id": "ec-003",
+      "question": "I want to file a formal complaint about harassment",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should create case immediately, this is serious",
+      "notes": "Serious issue requiring immediate case creation"
+    },
+    {
+      "id": "ec-004",
+      "question": "Can you open a ticket for my expense reimbursement that's been delayed for 3 weeks?",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should gather expense details and create case",
+      "notes": "Clear request to open ticket/case"
+    },
+    {
+      "id": "ec-005",
+      "question": "I need to report a workplace safety issue",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should create case for safety issue",
+      "notes": "Safety issues should always be escalated"
+    }
+  ],
+  "ambiguous": [
+    {
+      "id": "am-001",
+      "question": "I have a problem with my paycheck",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask clarifying questions: What's wrong? Missing? Incorrect amount? Then decide",
+      "notes": "Needs clarification before action"
+    },
+    {
+      "id": "am-002",
+      "question": "My manager isn't following policy",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask: Which policy? What happened? Formal complaint or guidance needed?",
+      "notes": "Could be question or serious complaint"
+    },
+    {
+      "id": "am-003",
+      "question": "I need help with benefits",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask: What kind of help? Question about coverage? Enrollment issue? Claim problem?",
+      "notes": "Too vague - needs clarification"
+    },
+    {
+      "id": "am-004",
+      "question": "I'm having issues with my performance review",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask: What kind of issues? Don't understand it? Disagree with rating? Technical problem?",
+      "notes": "Could be informational or formal appeal"
+    },
+    {
+      "id": "am-005",
+      "question": "Something's wrong with my time off request",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask: What's wrong? Can't submit? Was denied? Technical error?",
+      "notes": "Needs more context to determine action"
+    }
+  ],
+  "multi_turn": [
+    {
+      "id": "mt-001",
+      "conversation": [
+        {
+          "turn": 1,
+          "question": "What's the PTO policy?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["15 days", "tenure"]
+        },
+        {
+          "turn": 2,
+          "question": "How much do I have available?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_behavior": "Should remember PTO context, explain can't access personal balance, suggest checking Workday"
+        },
+        {
+          "turn": 3,
+          "question": "Can I carry it over?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["40 hours", "carryover"]
+        }
+      ],
+      "notes": "Test context maintenance across turns"
+    },
+    {
+      "id": "mt-002",
+      "conversation": [
+        {
+          "turn": 1,
+          "question": "Tell me about the medical insurance options",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["Plan A", "Plan B", "Plan C", "PPO", "HDHP"]
+        },
+        {
+          "turn": 2,
+          "question": "Which one has the HSA?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["Plan C", "HDHP", "$1,000"]
+        },
+        {
+          "turn": 3,
+          "question": "What's the company contribution for that one?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["85%", "Plan C"]
+        }
+      ],
+      "notes": "Should maintain insurance context without re-searching"
+    },
+    {
+      "id": "mt-003",
+      "conversation": [
+        {
+          "turn": 1,
+          "question": "What's the travel policy for meals?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["$20", "$30", "$60"]
+        },
+        {
+          "turn": 2,
+          "question": "What if I'm traveling to New York?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_behavior": "Should remember meal policy context, same limits apply"
+        },
+        {
+          "turn": 3,
+          "question": "Actually I need to book that trip, can you help?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_behavior": "Should explain to use TravelCorp, not create case"
+        }
+      ],
+      "notes": "Test context + appropriate tool selection"
+    }
+  ],
+  "complex_policy": [
+    {
+      "id": "cp-001",
+      "question": "What happens to my benefits if I take parental leave?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["12 weeks", "paid", "benefits continue"],
+      "notes": "Should search both time-off and benefits docs"
+    },
+    {
+      "id": "cp-002",
+      "question": "I'm at 4 years tenure - what's my PTO accrual and 401k match?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["20 days", "1.67", "100%", "3%", "50%", "2%"],
+      "notes": "Should find both policies and synthesize answer"
+    },
+    {
+      "id": "cp-003",
+      "question": "Can I expense a rental car for a 2-day trip to Chicago with 3 meetings at different locations?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["multiple meetings", "approved", "mid-size", "compact"],
+      "notes": "Should apply rental car policy criteria"
+    },
+    {
+      "id": "cp-004",
+      "question": "What's my total compensation including benefits if my salary is $80,000?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["401k match", "health insurance", "total compensation statement", "Workday"],
+      "notes": "Should explain components and where to find total comp statement"
+    },
+    {
+      "id": "cp-005",
+      "question": "I'm relocating from New York to Texas - what happens to my salary?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["geographic", "pay zone", "60 days", "notify HR"],
+      "notes": "Should find geographic pay policy from compensation-policy.md"
+    }
+  ],
+  "edge_cases": [
+    {
+      "id": "edge-001",
+      "question": "I'm unhappy with my performance review",
+      "expected_kb_search": true,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask if they want to understand the process or file a formal appeal",
+      "notes": "Could be informational or formal complaint"
+    },
+    {
+      "id": "edge-002",
+      "question": "My expense report was denied",
+      "expected_kb_search": false,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should ask: Do you want to understand why or appeal the decision?",
+      "notes": "Clarify intent before creating case"
+    },
+    {
+      "id": "edge-003",
+      "question": "I think I'm being discriminated against",
+      "expected_kb_search": true,
+      "expected_case_creation": true,
+      "expected_behavior": "Should search policy, explain reporting options, and create case",
+      "notes": "Serious issue - should escalate immediately"
+    },
+    {
+      "id": "edge-004",
+      "question": "My manager denied my PTO request for my wedding",
+      "expected_kb_search": true,
+      "expected_case_creation": "conditional",
+      "expected_behavior": "Should explain PTO approval process, ask if they want to escalate",
+      "notes": "Could be informational or formal complaint"
+    },
+    {
+      "id": "edge-005",
+      "question": "I haven't been paid in 2 weeks",
+      "expected_kb_search": false,
+      "expected_case_creation": true,
+      "expected_behavior": "Should create urgent case for payroll issue",
+      "notes": "Critical issue requiring immediate escalation"
+    }
+  ],
+  "should_not_create_cases": [
+    {
+      "id": "sncc-001",
+      "question": "How do I request time off?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Workday", "Request Time Off", "2 weeks advance"],
+      "notes": "Procedural question, not a case"
+    },
+    {
+      "id": "sncc-002",
+      "question": "What's covered under the EAP?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["counseling", "6 sessions", "legal", "financial"],
+      "notes": "Information request only"
+    },
+    {
+      "id": "sncc-003",
+      "question": "When do merit increases happen?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["April", "May 1", "annual"],
+      "notes": "Simple factual question"
+    },
+    {
+      "id": "sncc-004",
+      "question": "What's the tuition reimbursement policy?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["$5,250", "grade B", "2-year commitment"],
+      "notes": "Policy information request"
+    },
+    {
+      "id": "sncc-005",
+      "question": "Tell me about the different health insurance plans",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["Plan A", "Plan B", "Plan C", "deductible"],
+      "notes": "Comparison request, not case creation"
+    }
+  ],
+  "context_maintenance": [
+    {
+      "id": "cm-001",
+      "conversation": [
+        {
+          "turn": 1,
+          "question": "What's the hotel limit for Chicago?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["Tier 1", "$275", "Tier 2", "$200"]
+        },
+        {
+          "turn": 2,
+          "question": "What about meals?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_behavior": "Should remember travel context and provide meal limits"
+        },
+        {
+          "turn": 3,
+          "question": "Can I use Uber?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["yes", "reimbursable", "receipt"]
+        }
+      ],
+      "notes": "Should maintain travel expense context"
+    },
+    {
+      "id": "cm-002",
+      "conversation": [
+        {
+          "turn": 1,
+          "question": "I'm a new employee, when can I enroll in benefits?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["30 days", "first of month"]
+        },
+        {
+          "turn": 2,
+          "question": "What if I miss the deadline?",
+          "expected_kb_search": true,
+          "expected_case_creation": false,
+          "expected_behavior": "Should search for qualifying life events or next enrollment"
+        },
+        {
+          "turn": 3,
+          "question": "Where do I enroll?",
+          "expected_kb_search": false,
+          "expected_case_creation": false,
+          "expected_answer_contains": ["Workday", "benefits portal"]
+        }
+      ],
+      "notes": "Should maintain benefits enrollment context"
+    }
+  ],
+  "tool_selection": [
+    {
+      "id": "ts-001",
+      "question": "Show me my recent cases",
+      "expected_kb_search": false,
+      "expected_case_creation": false,
+      "expected_tool": "list_cases",
+      "notes": "Should use list_cases tool, not create new case"
+    },
+    {
+      "id": "ts-002",
+      "question": "What cases have I submitted?",
+      "expected_kb_search": false,
+      "expected_case_creation": false,
+      "expected_tool": "list_cases",
+      "notes": "Should list existing cases"
+    },
+    {
+      "id": "ts-003",
+      "question": "Search for information about remote work",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_tool": "search_knowledge_base",
+      "notes": "Explicit search request"
+    }
+  ],
+  "negative_tests": [
+    {
+      "id": "neg-001",
+      "question": "What's the weather like today?",
+      "expected_kb_search": false,
+      "expected_case_creation": false,
+      "expected_behavior": "Should politely decline, explain it's an HR assistant",
+      "notes": "Out of scope question"
+    },
+    {
+      "id": "neg-002",
+      "question": "Write me a Python script",
+      "expected_kb_search": false,
+      "expected_case_creation": false,
+      "expected_behavior": "Should explain it's an HR assistant, not a coding assistant",
+      "notes": "Out of scope request"
+    },
+    {
+      "id": "neg-003",
+      "question": "What's the capital of France?",
+      "expected_kb_search": false,
+      "expected_case_creation": false,
+      "expected_behavior": "Should politely decline and redirect to HR topics",
+      "notes": "Completely unrelated question"
+    }
+  ],
+  "accuracy_tests": [
+    {
+      "id": "acc-001",
+      "question": "What's the maximum hotel rate for San Francisco?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["$275", "Tier 1"],
+      "correct_answer": "$275 (Tier 1 city)",
+      "notes": "Test specific numeric accuracy"
+    },
+    {
+      "id": "acc-002",
+      "question": "How long is the maternity leave?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["12 weeks", "paid", "birth mothers"],
+      "correct_answer": "12 weeks paid for birth mothers",
+      "notes": "Should distinguish from paternity leave (6 weeks)"
+    },
+    {
+      "id": "acc-003",
+      "question": "What's the mileage reimbursement rate?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["$0.67"],
+      "correct_answer": "$0.67 per mile",
+      "notes": "Test specific rate accuracy"
+    },
+    {
+      "id": "acc-004",
+      "question": "How many bereavement days do I get for my grandmother?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["3 days", "grandparent"],
+      "correct_answer": "3 days for grandparent",
+      "notes": "Test specific policy detail"
+    },
+    {
+      "id": "acc-005",
+      "question": "What's the annual professional development budget?",
+      "expected_kb_search": true,
+      "expected_case_creation": false,
+      "expected_answer_contains": ["$1,500"],
+      "correct_answer": "$1,500 per employee per year",
+      "notes": "Test numeric accuracy"
+    }
+  ]
+}

@@ -123,7 +123,28 @@ Remember: You're here to make HR processes easier and more accessible for employ
 
 @app.entrypoint
 async def invoke(payload, context):
-    """AgentCore entrypoint for handling requests with Memory integration."""
+    """AgentCore entrypoint for handling requests with Memory integration.
+    
+    Expected Memory API Call Sequence:
+    
+    BEFORE agent.stream_async():
+    1. Session Manager __init__ -> read_session() -> 2 ListEvents (check if session exists)
+    2. Session Manager __init__ -> create_session() -> 1 CreateEvent (save session metadata)
+    3. Agent.__init__ -> initialize() -> read_agent() -> 2 ListEvents (check if agent exists)
+    4. Agent.__init__ -> initialize() -> create_agent() -> 1 CreateEvent (save agent metadata)
+    
+    DURING agent.stream_async():
+    - create_message() for each message (user, assistant, tool use/result) -> CreateEvent per message
+    - retrieve_customer_context() -> RetrieveMemoryRecords for each namespace in retrieval_config
+    - list_messages() if needed -> ListEvents
+    
+    AFTER agent.stream_async():
+    - Context manager __exit__ -> _flush_messages() (no-op if batch_size=1)
+    """
+    
+    log.info("="*60)
+    log.info("INVOKE STARTED")
+    log.info("="*60)
     
     # Extract or generate session_id
     session_id = payload.get("session_id")
@@ -192,6 +213,12 @@ async def invoke(payload, context):
     
     log.info(f"Using model: {model_id}, memory: {memory_id}")
     
+    log.info("="*60)
+    log.info("CREATING MEMORY CONFIG OBJECT")
+    log.info(f"  session_id: {session_id}")
+    log.info(f"  actor_id: {user_id}")
+    log.info("="*60)
+    
     # Define tools list
     tools = [
         search_hr_knowledge_base,
@@ -222,8 +249,23 @@ async def invoke(payload, context):
         }
     )
     
+    log.info(f"Memory config: memory_id={memory_id}, session_id={session_id}, actor_id={user_id}")
+    log.info(f"Retrieval namespaces: {list(memory_config.retrieval_config.keys())}")
+    
+    log.info("="*60)
+    log.info("ENTERING SESSION MANAGER CONTEXT")
+    log.info("This will call read_session() -> 2 ListEvents + create_session() -> 1 CreateEvent")
+    log.info("="*60)
+    
     # Use context manager to ensure messages are flushed to memory
     with AgentCoreMemorySessionManager(memory_config, region_name="us-east-1") as session_manager:
+        log.info("Session manager context entered")
+        
+        log.info("="*60)
+        log.info("CREATING AGENT OBJECT")
+        log.info("This will call initialize() -> read_agent() -> 2 ListEvents + create_agent() -> 1 CreateEvent")
+        log.info("="*60)
+        
         # Create agent with memory session manager
         agent = Agent(
             model=model,
@@ -232,8 +274,16 @@ async def invoke(payload, context):
             session_manager=session_manager
         )
         
+        log.info("Agent object created")
+        
+        log.info("="*60)
+        log.info("CALLING agent.stream_async() - AGENT PROCESSING STARTS HERE")
+        log.info("="*60)
+        
         # Stream response
         stream = agent.stream_async(payload.get("prompt"))
+        
+        log.info("Streaming response to client...")
         
         async for event in stream:
             # Handle text parts of the response
@@ -241,6 +291,9 @@ async def invoke(payload, context):
                 yield event["data"]
     
     # Memory is automatically flushed when exiting the context manager
+    log.info("="*60)
+    log.info("CONTEXT MANAGER EXIT - FLUSHING MEMORY")
+    log.info("="*60)
     log.info(f"Conversation saved to memory - session: {session_id}, user: {user_id}")
 
 

@@ -45,3 +45,6 @@ session-backend/lambda/bin/
 # Generated outputs
 outputs.json
 config-downloaded.json
+
+# Evaluation session data (may contain temporary AWS credentials in traces)
+evaluations/analyze/session_data_*/

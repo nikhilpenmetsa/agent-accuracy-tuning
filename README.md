@@ -161,6 +161,16 @@ This reference implementation includes all components needed for agent tuning:
 - Python 3.10+
 - AgentCore CLI installed
 - Bash shell
+- **CloudWatch Transaction Search enabled** (one-time account setup)
+
+### One-Time Account Setup
+
+**Enable CloudWatch Transaction Search** (required for observability):
+```bash
+bash setup-observability.sh
+```
+
+This enables traces, sessions, and metrics in the GenAI Observability dashboard. Wait 10 minutes after enabling for data to appear.
 
 ### Deployment Order
 
